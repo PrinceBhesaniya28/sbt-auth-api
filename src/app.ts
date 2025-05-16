@@ -1,10 +1,13 @@
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
 import bodyParser from "body-parser";
 import authRouter from "./routes/auth";
 import sbtRouter from "./routes/sbt";
 import creatorRouter from "./routes/creator";
 import adminRouter from "./routes/admin";
+import ipnftRoutes from "./routes/ipnft";
+import { MONGODB_URI } from "./config";
 
 const app = express();
 
@@ -12,11 +15,23 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Connect to MongoDB
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("Could not connect to MongoDB", err));
+
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api/sbt", sbtRouter);
 app.use("/api/creator", creatorRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/ipnft", ipnftRoutes);
+
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
+});
 
 // Error handling middleware
 app.use(
